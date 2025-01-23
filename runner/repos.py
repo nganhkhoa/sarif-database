@@ -20,10 +20,10 @@ def cmake_runner(tool):
   The default runner for CMake projects
   """
   tool.prepare(['cmake', '-B', 'build'])
-  tool.build(['make', '-C', 'build', '-j8'])
+  tool.build(['make', '-C', 'build', '-j16'])
 
 def make_runner(tool):
-  tool.build(['make', '-j8'])
+  tool.build(['make', '-j16'])
 
 def kbr5_runner(tool):
   raise "Not implemented"
@@ -64,8 +64,23 @@ gpac = Repo(
 )
 
 "https://github.com/nothings/stb.git"
-"https://github.com/Exiv2/exiv2.git"
-"git://w1.fi/hostap.git"
+
+exiv2 = Repo(
+  name = "exiv2",
+  url = "https://github.com/Exiv2/exiv2.git",
+  commits = ["e4adf38", "5ed9fb4"],
+  runner = cmake_runner,
+)
+
+def hostap_runner(tool):
+  pass
+
+hostap = Repo(
+  name = "hostap",
+  url = "git://w1.fi/hostap.git",
+  commits = ["a6ed414"],
+  runner = hostap_runner,
+)
 
 libxml2 = Repo(
   name = "libxml2",
@@ -94,12 +109,19 @@ p11_kit = Repo(
   runner = meson_runner,
 )
 
-# espeak_ng = Repo(
-#   name = "espeak-ng",
-#   url = "https://github.com/espeak-ng/espeak-ng.git",
-#   commits = ["0a713d5"],
-#   runner = cmake_runner,
-# )
+def espeak_ng_runner(tool):
+  subprocess.run(["./autogen.sh"], cwd=tool.cwd, shell=True)
+  subprocess.run(["./configure"], cwd=tool.cwd, shell=True)
+  subprocess.run(["make", "clean"], cwd=tool.cwd)
+  # documentation
+  tool.build(['make', '-j16', 'src/espeak-ng', 'src/espeak-ng'])
+
+espeak_ng = Repo(
+  name = "espeak-ng",
+  url = "https://github.com/espeak-ng/espeak-ng.git",
+  commits = ["0a713d5"],
+  runner = espeak_ng_runner,
+)
 
 def lz4_runner(tool):
   tool.prepare(['cmake', '-B', 'build', 'build/cmake/'])
@@ -119,7 +141,18 @@ md4c = Repo(
   runner = cmake_runner,
 )
 
-"https://github.com/libimobiledevice/libplist.git"
+def libplist_runner(tool):
+  subprocess.run(["./autogen.sh"], cwd=tool.cwd, shell=True)
+  subprocess.run(["./configure"], cwd=tool.cwd, shell=True)
+  subprocess.run(["make", "clean"], cwd=tool.cwd)
+  tool.build(['make', '-j16'])
+
+libplist = Repo(
+  name = "libplist",
+  url = "https://github.com/libimobiledevice/libplist.git",
+  commits = ["491a3ac"],
+  runner = libplist_runner,
+)
 
 libmobi = Repo(
   name = "libmobi",
@@ -135,9 +168,32 @@ libsndfile = Repo(
   runner = cmake_runner,
 )
 
-"https://github.com/mruby/mruby.git"
-"https://github.com/SELinuxProject/selinux.git"
-"https://github.com/LibRaw/LibRaw.git"
+mruby = Repo(
+  name = "mruby",
+  url = "https://github.com/mruby/mruby.git",
+  commits = set(["0ed3fcf", "d1f1b4e", "af5acf3", "55b5261", "8aec568", "4c196db", "bdc244e", "bf5bbf0", "b4168c9", "c30e6eb"]),
+  runner = make_runner,
+)
+
+selinux = Repo(
+  name = "selinux",
+  url = "https://github.com/SELinuxProject/selinux.git",
+  commits = ["5e6e516", "e9072e7"],
+  runner = make_runner,
+)
+
+def libraw_runner(tool):
+  subprocess.run(["./mkdist.sh"], cwd=tool.cwd, shell=True)
+  subprocess.run(["./configure"], cwd=tool.cwd, shell=True)
+  subprocess.run(["make", "clean"], cwd=tool.cwd)
+  tool.build(['make', '-j16'])
+
+libraw = Repo(
+  name = "LibRaw",
+  url = "https://github.com/LibRaw/LibRaw.git",
+  commits = set(["eaf63bf", "8382fac", "8382fac", "52b2fc5", "ae2dc58", "adcb898", "5eeffd5", "8382fac", "8382fac", "21f5e5b", "6fbba37"]),
+  runner = libraw_runner,
+)
 
 h3 = Repo(
   name = "h3",
@@ -146,9 +202,32 @@ h3 = Repo(
   runner = cmake_runner,
 )
 
-"https://github.com/samtools/htslib.git"
-"https://github.com/kjdev/hoextdown.git"
-"https://github.com/sleuthkit/sleuthkit.git"
+htslib = Repo(
+  name = "htslib",
+  url = "https://github.com/samtools/htslib.git",
+  commits = ["dd6f0b7"],
+  runner = make_runner,
+)
+
+hoextdown = Repo(
+  name = "hoextdown",
+  url = "https://github.com/kjdev/hoextdown.git",
+  commits = ["933f9da"],
+  runner = make_runner,
+)
+
+def sleuthkit_runner(tool):
+  subprocess.run(["./bootstrap"], cwd=tool.cwd, shell=True)
+  subprocess.run(["./configure"], cwd=tool.cwd, shell=True)
+  subprocess.run(["make", "clean"], cwd=tool.cwd)
+  tool.build(['make', '-j16'])
+
+sleuthkit = Repo(
+  name = "sleuthkit",
+  url = "https://github.com/sleuthkit/sleuthkit.git"
+  commits = ["34f995d", "38a13f9", "82d254b", "d9b19e1"],
+  runner = sleuthkit_runner,
+)
 
 assimp = Repo(
   name = "assimp",
@@ -157,8 +236,25 @@ assimp = Repo(
   runner = cmake_runner,
 )
 
-"https://github.com/facebook/zstd.git"
-"https://github.com/hunspell/hunspell.git"
+zstd = Repo(
+  name = "zstd",
+  url = "https://github.com/facebook/zstd.git",
+  commits = ["9ad7ea4", "0a96d00", "3cac061", "2fabd37", "6f40571", "d68aa19"],
+  runner = make_runner,
+)
+
+def hunspell_runner(tool):
+  subprocess.run(["autoreconf", "-vfi"], cwd=tool.cwd)
+  subprocess.run(["./configure"], cwd=tool.cwd, shell=True)
+  subprocess.run(["make", "clean"], cwd=tool.cwd)
+  tool.build(['make', '-j16'])
+
+hunspell = Repo(
+  name = "hunspell",
+  url = "https://github.com/hunspell/hunspell.git",
+  commits = set(["6291cac", "74b08bf", "82b9212", "6291cac", "6291cac", "ddec95b", "74b08bf", "1c1f34f", "74b08bf", "473241e", "6291cac"]),
+  runner = hunspell_runner,
+)
 
 def openexr_runner(tool):
   """
@@ -180,7 +276,18 @@ openexr = Repo(
   runner = openexr_runner,
 )
 
-"https://github.com/stefanberger/libtpms.git"
+def libtpms_runner(tool):
+  subprocess.run(["./autogen.sh"], cwd=tool.cwd, shell=True)
+  subprocess.run(["./configure"], cwd=tool.cwd, shell=True)
+  subprocess.run(["make", "clean"], cwd=tool.cwd)
+  tool.build(['make', '-j16'])
+
+libtpms = Repo(
+  name = "libtpms",
+  url = "https://github.com/stefanberger/libtpms.git",
+  commits = ["e563166"],
+  runner = libtpms_runner,
+)
 
 irssi = Repo(
   name = "irssi",
@@ -195,7 +302,6 @@ harfbuzz = Repo(
   commits = ["3194963", "fb795dc", "918193e"],
   runner = cmake_runner,
 )
-
 
 c_blosc = Repo(
   name = "c-blosc",
@@ -239,12 +345,28 @@ repos = [
   # libsndfile,
   # h3,
   # openexr,
+  # exiv2,
 
   # cannot build
   # irssi,
 
   # these are makefile projects
+  # espeak_ng,
+  # libplist,
+  # mruby,
+  # selinux,
+  # libraw,
+  # htslib,
+  # hoextdown,
+  # sleuthkit,
+  # zstd,
+  # hunspell,
+  # libtpms,
+
+  # hostap,
 
   # these projects are headers only?
   # infer cannot run with headers only?
+  # stb,
+  # json,
 ]
