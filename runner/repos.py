@@ -22,8 +22,11 @@ def cmake_runner(tool):
   tool.prepare(['cmake', '-B', 'build'])
   tool.build(['make', '-C', 'build', '-j8'])
 
+def make_runner(tool):
+  tool.build(['make', '-j8'])
+
 def kbr5_runner(tool):
-  tool.prepare([])
+  raise "Not implemented"
 
 kbr5 = Repo(
   name = "kbr5",
@@ -32,14 +35,11 @@ kbr5 = Repo(
   runner = kbr5_runner,
 )
 
-def libmpeg2_runner(tool):
-  tool.prepare([])
-
 libmpeg2 = Repo(
   name = "libmpeg2",
   url = "https://android.googlesource.com/platform/external/libmpeg2",
   commits = ['9fcdebe'],
-  runner = libmpeg2_runner,
+  runner = cmake_runner,
 )
 
 libavc = Repo(
@@ -66,10 +66,22 @@ gpac = Repo(
 "https://github.com/nothings/stb.git"
 "https://github.com/Exiv2/exiv2.git"
 "git://w1.fi/hostap.git"
-"https://github.com/GNOME/libxml2.git"
-"https://github.com/bytecodealliance/wasm-micro-runtime.git"
 
-def p11_kit_runner(tool):
+libxml2 = Repo(
+  name = "libxml2",
+  url = "https://github.com/GNOME/libxml2.git",
+  commits = ["b167c73", "ca2bfec", "5f4ec41", "9ef2a9a", "20f5c73", "7fbd454"],
+  runner = cmake_runner,
+)
+
+wasm_micro_runtime = Repo(
+  name = "wasm-micro-runtime",
+  url = "https://github.com/bytecodealliance/wasm-micro-runtime.git",
+  commits = ["b3f728c", "06df58f"],
+  runner = cmake_runner,
+)
+
+def meson_runner(tool):
   tool.set("integration", "cmake")
   tool.prepare(['meson', 'setup', 'build'])
   tool.set("integration", "make")
@@ -79,19 +91,61 @@ p11_kit = Repo(
   name = "p11-kit",
   url = "https://github.com/p11-glue/p11-kit.git",
   commits = ["7fe7e5d"],
-  runner = p11_kit_runner,
+  runner = meson_runner,
 )
 
-"https://github.com/espeak-ng/espeak-ng.git"
-"https://github.com/lz4/lz4.git"
-"https://github.com/mity/md4c.git"
+# espeak_ng = Repo(
+#   name = "espeak-ng",
+#   url = "https://github.com/espeak-ng/espeak-ng.git",
+#   commits = ["0a713d5"],
+#   runner = cmake_runner,
+# )
+
+def lz4_runner(tool):
+  tool.prepare(['cmake', '-B', 'build', 'build/cmake/'])
+  tool.build(['make', '-C', 'build', '-j8'])
+
+lz4 = Repo(
+  name = "lz4",
+  url = "https://github.com/lz4/lz4.git",
+  commits = ["7654a5a", "9d20cd5"],
+  runner = make_runner,
+)
+
+md4c = Repo(
+  name = "md4c",
+  url = "https://github.com/mity/md4c.git",
+  commits = ["3478ec6"],
+  runner = cmake_runner,
+)
+
 "https://github.com/libimobiledevice/libplist.git"
-"https://github.com/bfabiszewski/libmobi.git"
-"https://github.com/libsndfile/libsndfile.git"
+
+libmobi = Repo(
+  name = "libmobi",
+  url = "https://github.com/bfabiszewski/libmobi.git",
+  commits = ["1297ee0"],
+  runner = cmake_runner,
+)
+
+libsndfile = Repo(
+  name = "libsndfile",
+  url = "https://github.com/libsndfile/libsndfile.git",
+  commits = ["2b4cc4b", "fe49327", "932aead", "4819cad", "b706e62"],
+  runner = cmake_runner,
+)
+
 "https://github.com/mruby/mruby.git"
 "https://github.com/SELinuxProject/selinux.git"
 "https://github.com/LibRaw/LibRaw.git"
-"https://github.com/uber/h3.git"
+
+h3 = Repo(
+  name = "h3",
+  url = "https://github.com/uber/h3.git",
+  commits = ["f581626"],
+  runner = cmake_runner,
+)
+
 "https://github.com/samtools/htslib.git"
 "https://github.com/kjdev/hoextdown.git"
 "https://github.com/sleuthkit/sleuthkit.git"
@@ -105,10 +159,42 @@ assimp = Repo(
 
 "https://github.com/facebook/zstd.git"
 "https://github.com/hunspell/hunspell.git"
-"https://github.com/AcademySoftwareFoundation/openexr.git"
+
+def openexr_runner(tool):
+  """
+  This project has 2 errors when running with Infer,
+  1. undefined uintptr_t in src/bin/exrcheck/main.cpp
+  2. Wrong define COMP_EXTRA, fix in
+    src/test/OpenEXRCoreTest/CMakeLists.txt
+  Currently, fix and stash push manually, then the
+  following commands will perform the fix each checkout
+  """
+  subprocess.run(["git", "stash", "pop"], cwd=tool.cwd)
+  cmake_runner(tool)
+  subprocess.run(["git", "stash", "push", "src/"], cwd=tool.cwd)
+
+openexr = Repo(
+  name = "openexr",
+  url = "https://github.com/AcademySoftwareFoundation/openexr.git",
+  commits = ["115e42e", "672c77d", "4854db9", "7c40603", "e2919b5"],
+  runner = openexr_runner,
+)
+
 "https://github.com/stefanberger/libtpms.git"
-"https://github.com/irssi/irssi.git"
-"https://github.com/harfbuzz/harfbuzz.git"
+
+irssi = Repo(
+  name = "irssi",
+  url = "https://github.com/irssi/irssi.git",
+  commits = ["afcb483", "b472570"],
+  runner = meson_runner,
+)
+
+harfbuzz = Repo(
+  name = "harfbuzz",
+  url = "https://github.com/harfbuzz/harfbuzz.git",
+  commits = ["3194963", "fb795dc", "918193e"],
+  runner = cmake_runner,
+)
 
 
 c_blosc = Repo(
@@ -135,11 +221,30 @@ json_c = Repo(
 "https://github.com/nlohmann/json.git"
 
 repos = [
+  # these are cmake/meson projects
   # libavc,
   # json_c,
   # assimp,
   # c_blosc,
   # c_blosc2,
   # p11_kit
-  gpac,
+  # gpac,
+  # libxml2,
+  # lz4,
+  # libmpeg2,
+  # wasm_micro_runtime,
+  # md4c,
+  # harfbuzz,
+  # libmobi,
+  # libsndfile,
+  # h3,
+  # openexr,
+
+  # cannot build
+  # irssi,
+
+  # these are makefile projects
+
+  # these projects are headers only?
+  # infer cannot run with headers only?
 ]
