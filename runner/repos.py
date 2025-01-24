@@ -72,14 +72,33 @@ exiv2 = Repo(
   runner = cmake_runner,
 )
 
-def hostap_runner(tool):
-  pass
+def hostap_runner(folder):
+  """
+  Some how Infer does not add CONFIG_ECC to its build args
+  modify the code to always include the CONFIG_ECC code segment
+  """
+  def runner(tool):
+    if tool.cwd.name != folder:
+      tool.cwd = tool.cwd / folder
+    subprocess.run(['git', 'stash', 'pop'], cwd=tool.cwd)
+    subprocess.run(['make', 'clean'], cwd=tool.cwd)
+    tool.build(['make', '-j16'])
+    subprocess.run(['git', 'stash', 'push', '../src/crypto/crypto_openssl.c'],
+                   cwd=tool.cwd)
+  return runner
 
 hostap = Repo(
   name = "hostap",
   url = "git://w1.fi/hostap.git",
-  commits = ["a6ed414"],
-  runner = hostap_runner,
+  commits = ["a6ed414", "703c2b6"],
+  runner = hostap_runner("hostapd"),
+)
+
+wpa_supplicant = Repo(
+  name = "wpa",
+  url = "git://w1.fi/hostap.git",
+  commits = ["a6ed414", "703c2b6"],
+  runner = hostap_runner("wpa_supplicant"),
 )
 
 libxml2 = Repo(
@@ -175,11 +194,15 @@ mruby = Repo(
   runner = make_runner,
 )
 
+def selinux_runner(tool):
+  subprocess.run(["make", "clean"], cwd=tool.cwd)
+  tool.build(['make', '-j16', 'SUBDIRS=\'libsepol libselinux\''])
+
 selinux = Repo(
   name = "selinux",
   url = "https://github.com/SELinuxProject/selinux.git",
   commits = ["5e6e516", "e9072e7"],
-  runner = make_runner,
+  runner = selinux_runner,
 )
 
 def libraw_runner(tool):
@@ -224,7 +247,7 @@ def sleuthkit_runner(tool):
 
 sleuthkit = Repo(
   name = "sleuthkit",
-  url = "https://github.com/sleuthkit/sleuthkit.git"
+  url = "https://github.com/sleuthkit/sleuthkit.git",
   commits = ["34f995d", "38a13f9", "82d254b", "d9b19e1"],
   runner = sleuthkit_runner,
 )
@@ -326,6 +349,13 @@ json_c = Repo(
 
 "https://github.com/nlohmann/json.git"
 
+wasm3_harness = Repo(
+  name = "wasm3-harness",
+  url = "https://github.com/wasm3/wasm3.git",
+  commits = set(["970849d", "bc32ee0", "4f0b769", "4f0b769", "355285d", "0124fd5", "970849d", "4f0b769", "bc32ee0"]),
+  runner = cmake_runner,
+)
+
 repos = [
   # these are cmake/meson projects
   # libavc,
@@ -350,20 +380,27 @@ repos = [
   # cannot build
   # irssi,
 
+  # error during analysis
+  # sleuthkit,
+
+  # undefined uvwasi_* although linked together
+  # wasm3_harness,
+
+  # takes a long time
+  # mruby,
+
   # these are makefile projects
   # espeak_ng,
   # libplist,
-  # mruby,
   # selinux,
   # libraw,
   # htslib,
   # hoextdown,
-  # sleuthkit,
   # zstd,
   # hunspell,
   # libtpms,
-
   # hostap,
+  # wpa_supplicant,
 
   # these projects are headers only?
   # infer cannot run with headers only?
