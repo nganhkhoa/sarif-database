@@ -1,18 +1,20 @@
 class Tool:
-  __slots__ = ['attributes', 'cwd']
+  __slots__ = ['attributes', 'cwd', 'name']
 
-  def __init__(self, cwd):
-    self.cwd = cwd
+  def __init__(self):
+    self.cwd = None
     self.attributes = {}
 
-  def prepare(self, args):
-    pass
+  def set_cwd(self, root, sourcefiles):
+    """
+    root is the whole path to project
+    sourcefiles is the folder inside project
+    where every build commands is executed
+    """
+    self.cwd = root / sourcefiles
 
-  def build(self, args):
-    pass
-
-  def report_file(self):
-    return None
+  def invoke(self, command, **kargs):
+    subprocess.run(command, cwd=self.cwd)
 
   def set(self, key, value):
     self.attributes[key] = value
