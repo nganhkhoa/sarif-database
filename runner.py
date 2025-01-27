@@ -16,6 +16,7 @@ for repo in repos:
   if dir.exists():
     git = Repo(dir)
   else:
+    print(f"Repo not found, cloning {repo.url} to {dir}")
     git = Repo.clone_from(repo.url, dir)
 
   tool = Infer(dir)

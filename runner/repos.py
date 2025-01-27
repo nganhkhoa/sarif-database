@@ -26,10 +26,11 @@ def make_runner(tool):
   tool.build(['make', '-j16'])
 
 def kbr5_runner(tool):
-  raise "Not implemented"
+  subprocess.run(['automake'], cwd=tool.cwd / "src")
+  tool.build(['make', '-C', 'src', '-j16'])
 
-kbr5 = Repo(
-  name = "kbr5",
+krb5 = Repo(
+  name = "krb5",
   url = "https://github.com/krb5/krb5.git",
   commits = ['d864d74'],
   runner = kbr5_runner,
@@ -379,6 +380,7 @@ repos = [
 
   # cannot build
   # irssi,
+  # krb5,
 
   # error during analysis
   # sleuthkit,
