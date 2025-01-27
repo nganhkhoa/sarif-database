@@ -11,13 +11,13 @@ class Reporter:
     filepath = self.storage / filename
 
     if filepath.exists():
-      print("Found existing report file", filepath)
-      print("Please manually keep the file or move")
-      print("append to tar.gz is unsupported by Python")
-      print("Ctrl+C to exit")
-      print("Press any key to continue, overwrite")
-      input()
+      print(f"Found existing report file {filepath}")
+      print(">> Overwrite (y/n)", end=' ')
+      answer = input()
+      if answer != "y":
+        return False
     self.tar = tarfile.open(filepath, 'w:gz')
+    return True
 
   def add_report(self, commit, file):
     name = f"{self.name}_{commit}_{self.tag}.json"

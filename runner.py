@@ -13,7 +13,7 @@ def prepare_project_git(project):
   if dir.exists():
     return Repo(dir)
   else:
-    print(f"Repo not found, cloning {repo.url} to {dir}")
+    print(f"[+] Repo not found, cloning {repo.url} to {dir}")
     return Repo.clone_from(repo.url, dir)
 
 def run_through_projects(tool, projects):
@@ -22,12 +22,15 @@ def run_through_projects(tool, projects):
     git_repo = prepare_project_git(project)
     root = Path('projects') / project.name
 
-    reporter.new_group(project.name, tool.name)
+    will_report = reporter.new_group(project.name, tool.name)
+    if not will_report:
+      print(f"[*] Analysis for {project.name} is skipped")
+      print()
+      continue
     for commit in project.commits:
       git_repo.git.checkout(commit)
       tool.set_cwd(root, project.sourcefiles)
       report = tool.run(project)
-      print('we have report at', report)
       if report:
         reporter.add_report(commit, report)
     reporter.finalize_report()
@@ -58,4 +61,7 @@ if __name__ == "__main__":
   if args.command == 'analyze':
     tool = generate_tool(args.tool)
     projects = args.project.split(",")
-    run_through_projects(tool, filter(lambda r: r.name in projects, repos))
+    try:
+      run_through_projects(tool, filter(lambda r: r.name in projects, repos))
+    except:
+      pass
