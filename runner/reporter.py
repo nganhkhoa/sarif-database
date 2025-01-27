@@ -22,7 +22,7 @@ class Reporter:
   def add_report(self, commit, file):
     name = f"{self.name}_{commit}_{self.tag}.json"
     self.tar.add(file, arcname=name)
-    print("add report", name)
+    print(f"added report {name}")
 
   def finalize_report(self):
     self.tar.close()
