@@ -4,8 +4,7 @@ from dataclasses import dataclass
 from collections.abc import Callable
 
 from runner.tool import Tool
-
-BUILD_FOLDER = '_build'
+from runner.consts import BUILD_FOLDER
 
 @dataclass
 class Repo:

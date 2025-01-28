@@ -19,10 +19,16 @@ class Reporter:
     self.tar = tarfile.open(filepath, 'w:gz')
     return True
 
-  def add_report(self, commit, file):
-    name = f"{self.name}_{commit}_{self.tag}.json"
-    self.tar.add(file, arcname=name)
-    print(f"added report {name}")
+  def add_report(self, commit, path):
+    if path.is_dir():
+      for f in path.glob("*.sarif"):
+        name = f"{self.name}_{commit}_{f.stem}_{self.tag}.json"
+        self.tar.add(file, arcname=name)
+        print(f">> added report {name}")
+    else:
+      name = f"{self.name}_{commit}_{self.tag}.json"
+      self.tar.add(file, arcname=name)
+      print(f">> added report {name}")
 
   def finalize_report(self):
     self.tar.close()
