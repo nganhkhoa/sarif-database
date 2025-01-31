@@ -22,12 +22,12 @@ class Reporter:
   def add_report(self, commit, path):
     if path.is_dir():
       for f in path.glob("*.sarif"):
-        name = f"{self.name}_{commit}_{f.stem}_{self.tag}.json"
+        name = f"{self.name}_{commit}_{f.stem}_{self.tag}.sarif"
         self.tar.add(file, arcname=name)
         print(f">> added report {name}")
     else:
-      name = f"{self.name}_{commit}_{self.tag}.json"
-      self.tar.add(file, arcname=name)
+      name = f"{self.name}_{commit}_{self.tag}.sarif"
+      self.tar.add(path, arcname=name)
       print(f">> added report {name}")
 
   def finalize_report(self):
