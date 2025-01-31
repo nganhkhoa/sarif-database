@@ -68,5 +68,6 @@ if __name__ == "__main__":
     projects = args.project.split(",")
     try:
       run_through_projects(tool, args.report, filter(lambda r: r.name in projects, repos))
-    except:
+    except Exception as e:
+      print(e)
       pass
