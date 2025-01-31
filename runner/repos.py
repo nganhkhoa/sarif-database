@@ -3,8 +3,10 @@ import subprocess
 from dataclasses import dataclass
 from collections.abc import Callable
 
+from runner import utils
 from runner.tool import Tool
 from runner.consts import BUILD_FOLDER
+
 
 @dataclass
 class Repo:
@@ -78,34 +80,34 @@ exiv2 = Repo(
   build = cmake_runner,
 )
 
-def hostap_runner(folder):
+def hostap_runner(tool):
   """
   Some how Infer does not add CONFIG_ECC to its build args
   modify the code to always include the CONFIG_ECC code segment
   """
-  def runner(tool):
-    if tool.cwd.name != folder:
-      tool.cwd = tool.cwd / folder
-    subprocess.run(['git', 'stash', 'pop'], cwd=tool.cwd)
-    subprocess.run(['make', 'clean'], cwd=tool.cwd)
-    tool.build(['make', '-j16'])
-    subprocess.run(['git', 'stash', 'push', '../src/crypto/crypto_openssl.c'],
-                   cwd=tool.cwd)
-  return runner
+  utils.modify_file(tool.cwd / "../src/crypto/crypto_openssl.c",
+                    "#ifdef CONFIG_ECC", "#if 1")
+  # this file inside wpa_supplicant/
+  utils.modify_file(tool.cwd / "config_ssid.h",
+                    "#ifdef CONFIG_IEEE80211W", "#if 1")
+  tool.invoke(['make', '-j16'], make=True)
+  # restore project state, should be .. because
+  # tool.cwd is either in hostapd/ or wpa_supplicant/
+  subprocess.run(['git', 'checkout', '..'], cwd=tool.cwd)
 
 hostap = Repo(
   name = "hostap",
   url = "git://w1.fi/hostap.git",
-  commits = ["a6ed414", "703c2b6"],
-  build = hostap_runner("hostapd"),
+  commits = ["a6ed414", "703c2b6", "8112131"],
+  build = hostap_runner,
   sourcefiles = 'hostapd',
 )
 
 wpa_supplicant = Repo(
   name = "wpa",
   url = "git://w1.fi/hostap.git",
-  commits = ["a6ed414", "703c2b6"],
-  build = hostap_runner("wpa_supplicant"),
+  commits = ["a6ed414", "703c2b6", "8112131"],
+  build = hostap_runner,
   sourcefiles = 'wpa_supplicant',
 )
 
@@ -168,10 +170,9 @@ md4c = Repo(
 )
 
 def libplist_runner(tool):
-  subprocess.run(["./autogen.sh"], cwd=tool.cwd, shell=True)
-  subprocess.run(["./configure"], cwd=tool.cwd, shell=True)
-  subprocess.run(["make", "clean"], cwd=tool.cwd)
-  tool.build(['make', '-j16'])
+  tool.invoke(["./autogen.sh"], script=True)
+  tool.invoke(["./configure"], script=True)
+  tool.invoke(["make", "-j16"], make=True)
 
 libplist = Repo(
   name = "libplist",
@@ -292,8 +293,15 @@ def openexr_runner(tool):
   following commands will perform the fix each checkout
   """
   subprocess.run(["git", "stash", "pop"], cwd=tool.cwd)
+  # just redefine uintptr_t
+  utils.modify_file(tool.cwd / "src/bin/exrcheck/main.cpp",
+                    "uintptr_t", "unsigned long")
+  # do not wrap the string with "", the value inside cmake is still wrapped
+  utils.modify_file(tool.cwd / "src/test/OpenEXRCoreTest/CMakeLists.txt",
+                    "COMP_EXTRA=\"\\\\\"${OPENEXR_VERSION_RELEASE_TYPE}\\\\\"\"",
+                    "COMP_EXTRA=\"\\\\${OPENEXR_VERSION_RELEASE_TYPE}\\\\\"")
   cmake_runner(tool)
-  subprocess.run(["git", "stash", "push", "src/"], cwd=tool.cwd)
+  subprocess.run(["git", "checkout", "src/"], cwd=tool.cwd)
 
 openexr = Repo(
   name = "openexr",
