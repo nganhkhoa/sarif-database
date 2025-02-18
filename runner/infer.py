@@ -3,6 +3,7 @@ import shutil
 from enum import Enum
 
 from runner.tool import Tool
+from runner.consts import BUILD_FOLDER
 
 class Infer(Tool):
   name = "infer"
@@ -36,6 +37,6 @@ class Infer(Tool):
     if cmake:
       # we delete the build folder first
       # this would delete lz4 build folder
-      shutil.rmtree(self.cwd / "_build", ignore_errors=True)
+      shutil.rmtree(self.cwd / BUILD_FOLDER, ignore_errors=True)
       base += ['compile']
       subprocess.run([*base, '--', *command], cwd=self.cwd, check=True)
