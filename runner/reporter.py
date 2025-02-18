@@ -23,7 +23,7 @@ class Reporter:
     if path.is_dir():
       for f in path.glob("*.sarif"):
         name = f"{self.name}_{commit}_{f.stem}_{self.tag}.sarif"
-        self.tar.add(file, arcname=name)
+        self.tar.add(f, arcname=name)
         print(f">> added report {name}")
     else:
       name = f"{self.name}_{commit}_{self.tag}.sarif"
