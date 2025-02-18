@@ -65,9 +65,12 @@ def gpac_runner(tool):
 gpac = Repo(
   name = "gpac",
   url = "https://github.com/gpac/gpac.git",
-  commits = set([
-    "bb9ee4c", "a6b6408", "94cf5b1", "7e2cb01", "6f28c4c", "8f3088b", "cc95b16", "4c77303", "112767e", "a8bc2c8", "50a60b0", "fc9e290", "514a3af", "1b77837", "3ffe59c", "ebedc7a", "78f5269", "7e2e92f", "7edc40f", "89a80ca", "b6b6360", "ca1b48f", "7a6f636", "de7f3a8", "4925c40", "0b29a41", "b1042c3", "8db20cb", "be23476", "4607052", "d2de8b5", "49cb88a",
-  ]),
+  # commits = set([
+  #   "bb9ee4c", "a6b6408", "94cf5b1", "7e2cb01", "6f28c4c", "8f3088b", "cc95b16", "4c77303", "112767e", "a8bc2c8", "50a60b0", "fc9e290", "514a3af", "1b77837", "3ffe59c", "ebedc7a", "78f5269", "7e2e92f", "7edc40f", "89a80ca", "b6b6360", "ca1b48f", "7a6f636", "de7f3a8", "4925c40", "0b29a41", "b1042c3", "8db20cb", "be23476", "4607052", "d2de8b5", "49cb88a",
+  # ]),
+
+  # customized for CodeQL
+  commits = ["895ac12", "a8bc2c8", "13dad7d"],
   build = gpac_runner,
 )
 
@@ -111,11 +114,66 @@ wpa_supplicant = Repo(
   sourcefiles = 'wpa_supplicant',
 )
 
+def libxml2_runner(tool):
+  """
+  The default runner for CMake projects
+  """
+  tool.invoke(['cmake', '-B', BUILD_FOLDER], cmake=True)
+  tool.invoke(['make', '-C', BUILD_FOLDER, '-j16', 'LibXml2'], make=True)
+
 libxml2 = Repo(
   name = "libxml2",
   url = "https://github.com/GNOME/libxml2.git",
-  commits = ["b167c73", "ca2bfec", "5f4ec41", "9ef2a9a", "20f5c73", "7fbd454"],
-  build = cmake_runner,
+  # commits = ["b167c73", "ca2bfec", "5f4ec41", "9ef2a9a", "20f5c73", "7fbd454"],
+
+  # confirmed vuln commits
+  commits = set([
+    "14c62e0dd337208c6a5de45a90312eab0a6cf4e4",
+    "14c62e0dd337208c6a5de45a90312eab0a6cf4e4",
+    "14c62e0dd337208c6a5de45a90312eab0a6cf4e4",
+    "14c62e0dd337208c6a5de45a90312eab0a6cf4e4",
+    "14c62e0dd337208c6a5de45a90312eab0a6cf4e4",
+    "14c62e0dd337208c6a5de45a90312eab0a6cf4e4",
+    "14c62e0dd337208c6a5de45a90312eab0a6cf4e4",
+    "14c62e0dd337208c6a5de45a90312eab0a6cf4e4",
+    "f0a703dac85ad9398f208d3237ca19c483368834",
+    "42322eba820022eaebb9b6e7c083a8aadddea286",
+    "e115194e6fc7f86e2e47224b758653f43501e6fe",
+    "0e4a11bb30e85d21bce665b1df42f29529d1e0cd",
+    "0e4a11bb30e85d21bce665b1df42f29529d1e0cd",
+    "7fbd454d9f70f0f0c0a0c27a7d541fed4d038c2a", # already have
+    "00c2f549e483b4669d51b44d9af2bb1b26f58472",
+    "0533daf5d2747860a2aa636466bcf02972c2dfba", # huh?
+    "5f664ab2cfcf5b817924e303ca9e6699487b2af9",
+    "7f04e297318b1b908cec20711f74f75625afed7f",
+    "05c147c3ef2029019f4bca856a1319b14e2a0fa8",
+    "05c147c3ef2029019f4bca856a1319b14e2a0fa8",
+    "c63900fbc1a7c20eb872996ae700f264ba6d75ef",
+    "8afd321abd2f75cf795f679b54333237b364d4d9",
+    "9ef2a9abf357f747c2fb03841b7f479cc0dfd3ef", # already have
+    # "9ef2a9abf357f747c2fb03841b7f479cc0dfd3ef",
+    # "9ef2a9abf357f747c2fb03841b7f479cc0dfd3ef",
+    "36ea881b9d92166568b1d107181a05f673fd4ab1",
+    "b167c7314497b6cb0d9a587a31874ae0d273ffaa", # already have
+    "f0fd1b67fc883a24cdd039abb3d4fe4696104d72", # huh?
+    # "00ed736eecf93aeab49089abb06e0e5fc0e7e091", # libxml2class.py not found
+    "f6a9541fb85c1ffdee1399ad2c0a54faaebf9f38",
+    "f6a9541fb85c1ffdee1399ad2c0a54faaebf9f38",
+    "d025cfbb4bf05785d970e268e46d674580a8a686",
+    "0e201722e497f278f028c5c3916e293e2f77b5a4", # huh?
+    # "0e201722e497f278f028c5c3916e293e2f77b5a4",
+    "20f5c73457df065df21bf25aa081a0a4cd028046", # already have
+    "b76d81dab3869f16a5c3506d9902526dff583b3e",
+    "5cb4b05c57b945ed524da51d271f2209b2190a31", # huh?
+    # "5cb4b05c57b945ed524da51d271f2209b2190a31",
+    # "5cb4b05c57b945ed524da51d271f2209b2190a31",
+    "ecfbcc8a52b4376de0653ba4138493faeb6c7fa4",
+    "6c128fd58a0e4641c23a345d413672494622db1b", # huh?
+    "fa48187304039f8792d8e19129df7d64422e7f69",
+    "ec7be50662ec17104355e7357f5067d43c47b207", # huh?
+    # "84bab955fe01c50e64382481de67259047d917a9", # cannot build
+  ]),
+  build = libxml2_runner,
 )
 
 wasm_micro_runtime = Repo(
@@ -343,11 +401,75 @@ c_blosc = Repo(
   build = cmake_runner,
 )
 
+def c_blosc2_runner(tool):
+  """
+  The default runner for CMake projects
+  """
+  tool.invoke(['cmake', '-B', BUILD_FOLDER, '-DCMAKE_C_CFLAGS=-lz', '-DCMAKE_EXE_LINKER_FLAGS=-lz -lm'], cmake=True)
+  tool.invoke(['make', '-C', BUILD_FOLDER, '-j16'], make=True)
+
+
 c_blosc2 = Repo(
   name = "c-blosc2",
   url = "https://github.com/Blosc/c-blocs2.git",
-  commits = ["6fc4790", "aebf2b9", "81c2fcd", "4f6d42a", "81c2fcd", "cb15f1b", "38b23d5"],
-  build = cmake_runner,
+  # commits = ["6fc4790", "aebf2b9", "81c2fcd", "4f6d42a", "81c2fcd", "cb15f1b", "38b23d5"],
+
+  # confirmed vuln commits
+  commits = set([
+    "79e921d904d46fc9edc292e02a48f1aa54567a7d", # cannot build
+    "603cd3d160c28b807c2ca50113fda00bafa51be7",
+    "5a222cc79dc67ce01477da3a3ee10edf1076c655",
+    "4e231e35d1a72ccb6025e0f4a45327f0f5a3e28b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "5005516135da3b11762bd9b7dc8fea7b1bef631b",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "6ab571f1ee7cdd4dcf94a8919e71c6685bbd34ba",
+    "250ca709b73000fe9c96fcc26109f233103b1636",
+    "57fca38a4f51687d71e451ae29df6b353764fb72",
+    "cb15f1b2904c0c4087bb5422cf18a7091fc5ac82",
+    "ea4bf5d8341c4a861cd92eea0fb8331819a48f65",
+    "4d78953db484839708091c610951678ab4b2b555",
+    "1c9795f2e3e04a79f13d9e7658e6d6e47dfe1cc4",
+    "d1ea514286c47433dabcf47b11cf81d2248ca5bf",
+    "5d06b75a46ebc8ced68b2c5c11cd771aac0a4270",
+    "3294fdf03973e5c7d968f4de49f2354d2cabd921",
+    "3294fdf03973e5c7d968f4de49f2354d2cabd921",
+    "3294fdf03973e5c7d968f4de49f2354d2cabd921",
+    "3294fdf03973e5c7d968f4de49f2354d2cabd921",
+    "3294fdf03973e5c7d968f4de49f2354d2cabd921",
+    "c473b21cff5e1a459b4467f18bf7414114f848fd",
+    "861ba79f31393dec0a0782ca11cf32cebb6f6610",
+    "7be72a8f72330c13eb51c0eb992bcb0f2a027038",
+    "64fd6b78baf939ef32c3bfe118f718242d0e3f4c",
+  ]),
+  build = c_blosc2_runner,
 )
 
 json_c = Repo(
@@ -363,6 +485,33 @@ wasm3_harness = Repo(
   name = "wasm3-harness",
   url = "https://github.com/wasm3/wasm3.git",
   commits = set(["970849d", "bc32ee0", "4f0b769", "4f0b769", "355285d", "0124fd5", "970849d", "4f0b769", "bc32ee0"]),
+  build = cmake_runner,
+)
+
+def faad2_runner(tool):
+  tool.invoke(['./bootstrap'], script=True, check=True)
+  tool.invoke(['make', '-j8'], make=True)
+  subprocess.run(['git', 'checkout', '.'], cwd=tool.cwd)
+
+faad2 = Repo(
+  name = "faad2",
+  url = "https://github.com/knik0/faad2",
+  commits = ["bfab0b0", "1073aee"],
+  build = faad2_runner,
+  # build = bazel_runner,
+)
+
+libyang = Repo(
+  name = "libyang",
+  url = "https://github.com/CESNET/libyang",
+  commits = ["f6d684a"],
+  build = cmake_runner,
+)
+
+hiredis = Repo(
+  name = "hiredis",
+  url = "https://github.com/redis/hiredis",
+  commits = ["d5b4c69"],
   build = cmake_runner,
 )
 
@@ -417,4 +566,8 @@ repos = [
   # infer cannot run with headers only?
   # stb,
   # json,
+
+  faad2,
+  libyang,
+  hiredis,
 ]
